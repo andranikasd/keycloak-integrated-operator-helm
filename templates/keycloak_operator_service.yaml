@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.keycloakInstanceOperator.name }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.keycloakInstanceOperator.name }}
+spec:
+  type: {{ .Values.keycloakInstanceOperator.service.type }}
+  ports:
+    - port: {{ .Values.keycloakInstanceOperator.service.port }}
+      targetPort: {{ .Values.keycloakInstanceOperator.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: {{ .Values.keycloakInstanceOperator.name }}

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.keycloakInstanceOperator.name }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.keycloakInstanceOperator.name }}
+    app.kubernetes.io/version: {{ .Values.keycloakInstanceOperator.image.tag }}
+    app.kubernetes.io/managed-by: quarkus
+spec:
+  replicas: {{ .Values.keycloakInstanceOperator.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Values.keycloakInstanceOperator.name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Values.keycloakInstanceOperator.name }}
+        app.kubernetes.io/version: {{ .Values.keycloakInstanceOperator.image.tag }}
+    spec:
+      serviceAccountName: {{ .Values.keycloakInstanceOperator.name }}
+      containers:
+      - name: {{ .Values.keycloakInstanceOperator.name }}
+        image: "{{ .Values.keycloakInstanceOperator.image.repository }}:{{ .Values.keycloakInstanceOperator.image.tag }}"
+        imagePullPolicy: {{ .Values.keycloakInstanceOperator.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.keycloakInstanceOperator.service.targetPort }}

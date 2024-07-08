@@ -1,0 +1,34 @@
+keyclaokEdpOperator:
+  name: keycloak-edp-operator
+  annotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  image:
+    repository: docker.io/epamedp/keycloak-operator
+    tag: 1.20.0
+  imagePullPolicy: "IfNotPresent"
+  resources:
+    limits:
+      memory: 192Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  extraVolumes: []
+  extraVolumeMounts: []
+  clusterReconciliationEnabled: false
+
+keycloakInstanceOperator:
+  name: keycloak-instance-operator
+  image:
+    repository: quay.io/keycloak/keycloak-operator
+    tag: 24.0.2
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  replicas: 1
+  serviceAccount:
+    create: true
+    annotations: {}

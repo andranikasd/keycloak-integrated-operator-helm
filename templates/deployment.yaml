@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    {{- include "keycloak-operator.labels" . | nindent 4 }}
+  {{- with .Values.keyclaokEdpOperator.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  name: {{ .Values.keyclaokEdpOperator.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: {{ .Values.keyclaokEdpOperator.name }}
+  template:
+    metadata:
+      labels:
+        name: {{ .Values.keyclaokEdpOperator.name }}
+    spec:
+      serviceAccountName: edp-{{ .Values.keyclaokEdpOperator.name }}
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: {{ .Values.keyclaokEdpOperator.name }}
+          # Replace this with the built image name
+          image: {{ .Values.keyclaokEdpOperator.image.repository }}:{{ .Values.keyclaokEdpOperator.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: "{{ .Values.keyclaokEdpOperator.imagePullPolicy }}"
+          command:
+            - /manager
+          securityContext:
+            allowPrivilegeEscalation: false
+          env:
+            - name: WATCH_NAMESPACE
+              {{- if .Values.keyclaokEdpOperator.clusterReconciliationEnabled }}
+              value: ""
+              {{- else }}
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+              {{- end }}
+            - name: OPERATOR_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+        {{- if .Values.keyclaokEdpOperator.extraVolumeMounts }}
+          volumeMounts:
+          {{- if .Values.keyclaokEdpOperator.extraVolumeMounts }}
+            {{- toYaml .Values.keyclaokEdpOperator.extraVolumeMounts | nindent 12 }}
+          {{- end }}
+        {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8081
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+{{ toYaml .Values.keyclaokEdpOperator.resources | indent 12 }}
+    {{- if .Values.keyclaokEdpOperator.extraVolumes }}
+      volumes:
+      {{- if .Values.keyclaokEdpOperator.extraVolumes }}
+        {{- toYaml .Values.keyclaokEdpOperator.extraVolumes | nindent 8 }}
+      {{- end }}
+    {{- end }}
+      {{- with .Values.keyclaokEdpOperator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.keyclaokEdpOperator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.keyclaokEdpOperator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
