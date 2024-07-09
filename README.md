@@ -11,7 +11,7 @@ A Helm chart for EDP and official Keycloak Operators
 | Name | Email | Url |
 | ---- | ------ | --- |
 | Andranik Grigoryan | andranik.grigoryan.working@gmail.com | <https://github.com/andranikasd> |
-| sergk |  | <https://github.com/SergK> |
+
 
 ## Source Code
 
